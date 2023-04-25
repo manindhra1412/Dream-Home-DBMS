@@ -360,12 +360,12 @@ app.post("/result/10",function(req,res){
 });
 
 app.post("/result/11",function(req,res){
-  const branch=req.body.branch;
+  const {branchNo}=req.body;
   connection.query(`SELECT p.propertyNo, p.street, p.city, p.postcode, p.type, p.rooms, p.rent, o.fName AS owner_fname, o.lName AS owner_lname
   FROM property p
   INNER JOIN ownerNo o ON p.ownerNo = o.ownerNo
   INNER JOIN staff s ON p.staffNo = s.staffNo
-  WHERE s.branchNo = '${branch_no}';` ,(err,result)=>{
+  WHERE s.branchNo = '${branchNo}' AND p.isbusiness=1` ,(err,result)=>{
     if(err)
       console.log(err)
     res.render('result',{results:result})
@@ -470,10 +470,12 @@ app.post("/result/20",function(req,res){
 });
 
 app.post("/result/21",function(req,res){
-  connection.query(`SELECT * FROM employees
-  WHERE job_title = 'Assistant' AND branch = 'branch_name'
-  ORDER BY name ASC;  
-  `,(err,result)=>{
+  const {branchNo}=req.body
+  if(!branchNo)
+    return res.send("Enter branch number.")
+  connection.query(`SELECT fname,branchNo FROM staff
+  WHERE position = 'assistant' AND branchNo = '${branchNo}'
+  ORDER BY fname ASC`,(err,result)=>{
     if(err)
       console.log(err)
     res.render('result',{results:result})
